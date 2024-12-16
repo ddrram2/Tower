@@ -4,7 +4,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.google.gms.google-services'
 
 dependencies {
-    implementation 'com.android.support:multidex:1.0.1'
+    implementation 'com.android.support:multidex:1.0.3'
 
     implementation "com.google.android.gms:play-services-maps:${play_services_version}"
     implementation "com.google.android.gms:play-services-location:${play_services_version}"
@@ -19,7 +19,7 @@ dependencies {
     implementation "com.android.support:design:${support_lib_version}"
 
     // Android library to display the changelog
-    implementation 'com.github.gabrielemariotti.changeloglib:changelog:2.0.0'
+    implementation 'com.github.gabrielemariotti.changeloglib:changelog:2.1.0'
 
     //DroneKit-Android client lib
     implementation 'com.o3dr.android:dronekit-android:3.0.2'
@@ -41,18 +41,18 @@ dependencies {
     implementation "com.squareup.okhttp:okhttp:${okhttp_version}"
     implementation "com.squareup.okhttp:okhttp-urlconnection:${okhttp_version}"
 
-    implementation 'com.jakewharton.timber:timber:3.1.0'
+    implementation 'com.jakewharton.timber:timber:5.0.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     //Charts and graph library
-    implementation 'com.github.lecho:hellocharts-library:1.5.5@aar'
+    implementation 'com.github.lecho:hellocharts-library:1.5.8@aar'
     implementation 'com.google.firebase:firebase-crashlytics:17.2.1'
     implementation 'com.google.firebase:firebase-analytics:17.5.0'
 
     //Leak canary (https://github.com/square/leakcanary)
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
-    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
-    testImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'
+    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.3'
+    testImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.3'
 }
 
 def versionPrefix = "Tower-v"
@@ -72,6 +72,8 @@ def logLevelError = 6;
 def logLevelAssert = 7;
 
 android {
+    namespace "org.droidplanner.android"
+
     compileSdkVersion android_build_sdk_version
 
     dexOptions {
@@ -84,10 +86,6 @@ android {
         targetSdkVersion android_build_target_sdk_version
         versionCode computeVersionCode(versionMajor, versionMinor, versionPatch, versionBuild)
         versionName generateVersionName(versionPrefix, versionMajor, versionMinor, versionPatch)
-
-        buildConfigField "boolean", "WRITE_LOG_FILE", "true"
-        buildConfigField "int", "LOG_FILE_LEVEL", "$logLevelDebug"
-        buildConfigField "boolean", "ENABLE_CRASHLYTICS", "false"
 
         //Manifest placeholders (http://tools.android.com/tech-docs/new-build-system/user-guide/manifest-merger#TOC-Placeholder-support)
         manifestPlaceholders = [
@@ -141,81 +139,10 @@ android {
     android.applicationVariants.all { variant ->
         variant.outputs.all {
             outputFileName = "${variant.name}-${variant.versionName}.apk"
-        }
-    }
+        }}
 
-    android.variantFilter { variant ->
-        def flavors = variant.getFlavors()
-        if (!flavors.isEmpty()) {
-            def flavorName = flavors.get(0).name
-            def buildTypeName = variant.buildType.name
+    flavorDimensions "default"
 
-            //Filter out the variants we're not interested in building.
-            def ignoreVariant = true
-            switch (buildTypeName) {
-                case "release":
-                    switch (flavorName) {
-                        case "prod":
-                        case "beta":
-                            ignoreVariant = false
-                            break
-                    }
-                    break;
-
-                case "debug":
-                    switch (flavorName) {
-                        case "dev":
-                            ignoreVariant = false
-                            break
-                    }
-                    break;
-            }
-
-            variant.setIgnore(ignoreVariant);
-        }
-    }
-
-    productFlavors {
-        dev {
-            applicationIdSuffix ".debug"
-            resValue "string", "app_title", "Tower Dev"
-            resValue "string", "baidu_api_key", ""
-            versionName generateVersionName(versionPrefix, versionMajor, versionMinor, versionPatch, "debug.${versionBuild}")
-
-            //Enable or disable crashlytics based on the availability of the api key
-            ext.enableCrashlytics = false
-        }
-
-        beta {
-            applicationIdSuffix ".beta"
-            resValue "string", "app_title", "Tower Beta"
-            resValue "string", "baidu_api_key", "4x7A3lUHEmzFxosafDa4bLP7yinmEnPh"
-            versionName generateVersionName(versionPrefix, versionMajor, versionMinor, versionPatch, "beta.${versionBuild}")
-
-            //Enable or disable crashlytics based on the availability of the api key
-            ext.enableCrashlytics = hasFabricApiKey()
-        }
-
-        prod {
-            resValue "string", "app_title", "Tower"
-            resValue "string", "baidu_api_key", "41mPy2URFjOL61GzyWk8U5oLhhwSYGWe"
-            buildConfigField "boolean", "WRITE_LOG_FILE", "false"
-
-            //Enable or disable crashlytics based on the availability of the api key
-            ext.enableCrashlytics = hasFabricApiKey()
-        }
-    }
-
-    buildTypes {
-        debug {
-            buildConfigField "boolean", "ENABLE_CRASHLYTICS", "false"
-        }
-
-        release {
-            signingConfig signingConfigs.release
-            buildConfigField "boolean", "ENABLE_CRASHLYTICS", "${hasFabricApiKey()}"
-        }
-    }
     lint {
         abortOnError false
     }
