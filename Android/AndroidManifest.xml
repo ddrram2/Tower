@@ -69,10 +69,6 @@
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="@string/baidu_api_key" />
 
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="${fabricApiKey}"/>
-
         <activity
             android:name=".activities.AccountActivity"
             android:label="@string/account_label"

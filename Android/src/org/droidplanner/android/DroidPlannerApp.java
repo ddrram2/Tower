@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import io.fabric.sdk.android.Fabric;
 import timber.log.Timber;
 
 public class DroidPlannerApp extends MultiDexApplication implements DroneListener, TowerListener, LinkListener {
@@ -189,10 +188,6 @@ public class DroidPlannerApp extends MultiDexApplication implements DroneListene
             Timber.plant(logToFileTree);
         } else if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
-        }
-
-        if(BuildConfig.ENABLE_CRASHLYTICS) {
-            Fabric.with(context, new Crashlytics());
         }
     }
 

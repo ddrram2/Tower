@@ -5,8 +5,8 @@ buildscript {
     ext {
         kotlin_version = '2.1.0'
 
-        play_services_version = '21.3.0'
-        support_lib_version = '23.4.0'
+        play_services_version = '18.1.0'
+        support_lib_version = '28.0.0'
         okhttp_version = '2.7.5'
 
         android_build_sdk_version = 23
@@ -59,7 +59,7 @@ def generateVersionName(String versionPrefix, int versionMajor, int versionMinor
 
 allprojects {
     repositories {
-        jcenter()
+        google()
         mavenCentral()
 
         maven {
@@ -69,8 +69,6 @@ allprojects {
                 password getMavenApiKey()
             }
         }
-
-        maven { url 'https://maven.fabric.io/public' }
 
         flatDir {
             dirs 'libs'
